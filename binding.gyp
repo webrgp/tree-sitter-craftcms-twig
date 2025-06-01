@@ -1,7 +1,7 @@
 {
   "targets": [
     {
-      "target_name": "tree_sitter_twig_binding",
+      "target_name": "tree_sitter_craftcms_twig_binding",
       "include_dirs": [
         "<!(node -e \"require('nan')\")",
         "src"

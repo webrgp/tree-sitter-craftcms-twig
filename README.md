@@ -1,6 +1,6 @@
 # tree-sitter-craftcms-twig
 
-Twig grammar for [tree-sitter](https://github.com/tree-sitter/tree-sitter) with support for [Craft CMS](https://craftcms.com/) Twig syntax.
+Craft CMS Twig grammar for [tree-sitter](https://github.com/tree-sitter/tree-sitter) with comprehensive support for [Craft CMS](https://craftcms.com/) template syntax.
 
 ## Installation
 
@@ -48,7 +48,7 @@ extern "C" { fn tree_sitter_twig() -> Language; }
 fn main() {
     let mut parser = Parser::new();
     let language = unsafe { tree_sitter_twig() };
-    parser.set_language(language).expect("Error loading Twig grammar");
+    parser.set_language(language).expect("Error loading Craft CMS Twig grammar");
 
     let source_code = r#"
         {% for item in items %}

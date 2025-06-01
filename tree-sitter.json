@@ -1,11 +1,11 @@
 {
   "metadata": {
-    "name": "craftcms-twig",
+    "name": "tree-sitter-craftcms-twig",
     "version": "0.1.0"
   },
   "grammars": [
     {
-      "name": "craftcms-twig",
+      "name": "tree-sitter-craftcms-twig",
       "scope": "source.twig",
       "file-types": ["twig", "html.twig"],
       "highlights": "queries/highlights.scm",
