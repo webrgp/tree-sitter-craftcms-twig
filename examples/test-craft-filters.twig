@@ -1,0 +1,36 @@
+{# Test Craft CMS Filters #}
+
+{# Simple filters without arguments #}
+{{ myAddress|address }}
+{{ 'über'|ascii }}
+{{ 'foo bar'|camel }}
+{{ 'secure-string'|encenc }}
+{{ 'data'|hash }}
+{{ 'input[name]'|id }}
+{{ content|parseRefs }}
+{{ content|purify }}
+{{ date|timestamp }}
+{{ data|literal }}
+
+{# Filters with single arguments #}
+{{ '<div></div>'|append('<p>Content</p>') }}
+{{ 1000000|currency('USD') }}
+{{ html|namespace('foo') }}
+
+{# Filters with multiple arguments #}
+{{ works|contains('rating', 'm') }}
+{{ mountains|firstWhere('range', null) }}
+
+{# Complex filter chains #}
+{{ entry.title|ascii|camel }}
+{{ user.address|address|namespace('user') }}
+{{ content|parseRefs|purify }}
+
+{# Filters in conditional expressions #}
+{% if entry.title|ascii is defined %}
+  {{ entry.title|ascii|camel }}
+{% endif %}
+
+{# Filters with complex arguments #}
+{{ data|currency(site.currency) }}
+{{ content|namespace('section-' ~ entry.section.handle) }}

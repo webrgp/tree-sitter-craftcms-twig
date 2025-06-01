@@ -1,0 +1,38 @@
+{# Simple Craft CMS Tests #}
+
+{# These should all work with current grammar #}
+{% if myArray is array %}
+  <p>Is array</p>
+{% endif %}
+
+{% if myFlag is boolean %}
+  <p>Is boolean</p>
+{% endif %}
+
+{% if myFunction is callable %}
+  <p>Is callable</p>
+{% endif %}
+
+{% if myCollection is countable %}
+  <p>Is countable</p>
+{% endif %}
+
+{% if myNumber is integer %}
+  <p>Is integer</p>
+{% endif %}
+
+{% if myDecimal is float %}
+  <p>Is float</p>
+{% endif %}
+
+{% if myValue is numeric %}
+  <p>Is numeric</p>
+{% endif %}
+
+{% if myObj is object %}
+  <p>Is object</p>
+{% endif %}
+
+{% if myField is missing %}
+  <p>Is missing</p>
+{% endif %}

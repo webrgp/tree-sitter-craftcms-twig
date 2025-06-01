@@ -1,0 +1,38 @@
+{# Test Craft CMS Functions #}
+
+{# Functions without arguments #}
+{{ csrfInput() }}
+{{ collect() }}
+
+{# Functions with single arguments #}
+{{ actionInput('users/save-user') }}
+{{ siteUrl('company/contact') }}
+{{ svg('@webroot/icons/lemon.svg') }}
+{{ dataUrl(myAsset) }}
+{{ seq('hits:' ~ entry.id) }}
+
+{# Functions with complex arguments #}
+{{ gql('{entries(limit: 2) { title }}') }}
+{{ create('craft\\elements\\Entry') }}
+
+{# Function chains and member access #}
+{{ plugin('commerce').version }}
+{{ plugin('seo').settings.siteName }}
+
+{# Functions in expressions #}
+{% set csrfToken = csrfInput() %}
+{% set entryUrl = siteUrl('entries/' ~ entry.slug) %}
+
+{# Functions with multiple arguments and complex syntax #}
+{{ actionInput('entries/save-entry', {
+    'entryId': entry.id,
+    'siteId': currentSite.id
+}) }}
+
+{# Nested function calls #}
+{{ collect(gql('{entries { title }}').data.entries) }}
+
+{# Functions in conditional expressions #}
+{% if actionInput('users/login') is defined %}
+  {{ actionInput('users/login') }}
+{% endif %}

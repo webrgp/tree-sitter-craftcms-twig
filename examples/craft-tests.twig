@@ -1,0 +1,119 @@
+{# Craft CMS Tests Examples #}
+
+<div class="type-checks">
+  
+  {# Standard Twig tests (should already work) #}
+  {% if variable is defined %}
+    <p>Variable is defined</p>
+  {% endif %}
+  
+  {% if array is empty %}
+    <p>Array is empty</p>
+  {% endif %}
+  
+  {% if number is even %}
+    <p>Number is even</p>
+  {% endif %}
+  
+  {% if number is odd %}
+    <p>Number is odd</p>
+  {% endif %}
+  
+  {% if value is null %}
+    <p>Value is null</p>
+  {% endif %}
+  
+  {# Craft CMS-specific tests (need to be implemented) #}
+  {% if myArray is array %}
+    <p>Variable is an array</p>
+  {% endif %}
+  
+  {% if myFlag is boolean %}
+    <p>Variable is a boolean</p>
+  {% endif %}
+  
+  {% if myFunction is callable %}
+    <p>Variable is callable</p>
+  {% endif %}
+  
+  {% if myCollection is countable %}
+    <p>Variable is countable</p>
+  {% endif %}
+  
+  {% if myDecimal is float %}
+    <p>Variable is a float</p>
+  {% endif %}
+  
+  {% if myNumber is integer %}
+    <p>Variable is an integer</p>
+  {% endif %}
+  
+  {% if myValue is numeric %}
+    <p>Variable is numeric</p>
+  {% endif %}
+  
+  {% if myObj is object %}
+    <p>Variable is an object</p>
+  {% endif %}
+  
+  {% if myField is missing %}
+    <p>Field is missing</p>
+  {% endif %}
+  
+  {# Instance of test with function call syntax #}
+  {% if entry is instance of('craft\\elements\\Entry') %}
+    <p>Entry is a Craft Entry element</p>
+  {% endif %}
+  
+  {% if user is instance of('craft\\elements\\User') %}
+    <p>User is a Craft User element</p>
+  {% endif %}
+  
+  {# Complex type checking scenarios #}
+  {% if entry.customField is defined and entry.customField is not empty %}
+    {% if entry.customField is array %}
+      <ul>
+        {% for item in entry.customField %}
+          <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+    {% elseif entry.customField is object %}
+      <div>{{ entry.customField.toString() }}</div>
+    {% else %}
+      <span>{{ entry.customField }}</span>
+    {% endif %}
+  {% endif %}
+  
+  {# Numerical type checks #}
+  {% if entry.price is defined %}
+    {% if entry.price is numeric %}
+      {% if entry.price is integer %}
+        <span class="price-whole">${{ entry.price }}</span>
+      {% elseif entry.price is float %}
+        <span class="price-decimal">${{ entry.price|number_format(2) }}</span>
+      {% endif %}
+    {% endif %}
+  {% endif %}
+  
+  {# Collection and callable checks #}
+  {% if craft.entries is callable %}
+    {% set entries = craft.entries().section('blog').all() %}
+    
+    {% if entries is countable %}
+      <p>Found {{ entries|length }} blog entries</p>
+    {% endif %}
+  {% endif %}
+  
+  {# Missing field checks (Craft-specific) #}
+  {% if nonExistentField is missing %}
+    <p>Field doesn't exist in this context</p>
+  {% endif %}
+  
+  {# Boolean type checking #}
+  {% if entry.featured is boolean %}
+    <div class="featured-indicator">
+      Featured: {{ entry.featured ? 'Yes' : 'No' }}
+    </div>
+  {% endif %}
+  
+</div>

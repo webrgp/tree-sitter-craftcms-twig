@@ -1,0 +1,103 @@
+{# Craft CMS Assets and Resources Examples #}
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{{ entry.title }}</title>
+  
+  {# CSS registration #}
+  {% css '/assets/css/main.css' %}
+  {% css '/assets/css/components.css' with {media: 'screen'} %}
+  {% css %}
+    .dynamic-style {
+      color: {{ entry.themeColor }};
+    }
+  {% endcss %}
+  
+  {# Conditional CSS #}
+  {% if entry.useCustomTheme %}
+    {% css '/assets/css/themes/' ~ entry.theme ~ '.css' %}
+  {% endif %}
+  
+  {# CSS with attributes #}
+  {% css '/assets/css/print.css' with {
+    media: 'print',
+    rel: 'stylesheet'
+  } %}
+  
+</head>
+<body>
+  <header>
+    {# SVG icons #}
+    <div class="logo">
+      {{ svg('@webroot/icons/logo.svg') }}
+    </div>
+    
+    <nav>
+      {{ svg('@webroot/icons/menu.svg', {class: 'menu-icon'}) }}
+    </nav>
+  </header>
+  
+  <main>
+    {# Custom headers #}
+    {% header 'X-Custom-Header': 'CustomValue' %}
+    {% header 'Cache-Control': 'public, max-age=3600' %}
+    {% header 'X-Frame-Options': 'SAMEORIGIN' %}
+    
+    {# Dynamic headers #}
+    {% header 'X-Entry-ID': entry.id %}
+    {% header 'X-Site': currentSite.handle %}
+    
+    <article>
+      <h1>{{ entry.title }}</h1>
+      
+      {# Asset handling #}
+      {% if entry.featuredImage %}
+        <img src="{{ entry.featuredImage.url }}" 
+             alt="{{ entry.featuredImage.alt }}"
+             data-src="{{ dataUrl(entry.featuredImage) }}">
+      {% endif %}
+      
+      {# Multiple assets #}
+      {% for asset in entry.gallery.all() %}
+        <figure>
+          <img src="{{ asset.url }}" alt="{{ asset.title }}">
+          <figcaption>{{ asset.title }}</figcaption>
+        </figure>
+      {% endfor %}
+      
+    </article>
+  </main>
+  
+  {# JavaScript registration #}
+  {% js '/assets/js/main.js' %}
+  {% js '/assets/js/components.js' with {defer: true} %}
+  {% js '/assets/js/analytics.js' with {async: true} %}
+  
+  {# Conditional JavaScript #}
+  {% if entry.enableInteractivity %}
+    {% js '/assets/js/interactive.js' %}
+  {% endif %}
+  
+  {# Inline JavaScript #}
+  {% js %}
+    window.siteConfig = {
+      baseUrl: "{{ siteUrl }}",
+      csrfToken: "{{ craft.app.request.csrfToken }}",
+      currentUser: {{ currentUser ? currentUser.id : 'null' }}
+    };
+  {% endjs %}
+  
+  {# JavaScript with positioning #}
+  {% js at head '/assets/js/critical.js' %}
+  {% js at beginBody '/assets/js/early.js' %}
+  {% js at endBody '/assets/js/late.js' %}
+  
+  {# External resources #}
+  {% js 'https://cdn.example.com/library.js' with {
+    integrity: 'sha384-...',
+    crossorigin: 'anonymous'
+  } %}
+  
+</body>
+</html>

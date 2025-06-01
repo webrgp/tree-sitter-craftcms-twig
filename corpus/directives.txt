@@ -1,0 +1,105 @@
+==================
+Empty template
+==================
+---
+(template)
+
+==================
+Content one line
+==================
+Lorem ipsum
+---
+(template
+  (content))
+
+==================
+Content two line
+==================
+Lorem ipsum
+
+---
+(template
+  (content))
+
+==================
+Content with curly brace
+==================
+Lorem { ipsum
+---
+(template
+  (content))
+
+==================
+Empty comment
+==================
+{# #}
+---
+(template (comment))
+
+==================
+comment single line
+==================
+{# comment #}
+---
+(template
+  (comment))
+
+==================
+comment multi line
+==================
+{# note: disabled template because we no longer use this
+  {% for user in users %}
+    ...
+  {% endfor %}
+#}
+---
+(template
+  (comment))
+
+==================
+Lorem {# comment #} ipsum
+==================
+Lorem {# comment #} ipsum
+---
+(template
+  (content)
+  (comment)
+  (content))
+
+==================
+{# comment #} Lorem  {# comment #}
+==================
+{# comment #} Lorem  {# comment #}
+---
+(template
+  (comment)
+  (content)
+  (comment))
+
+===
+comment with hashes
+===
+{# # safsaf
+    # asfasf
+#}
+
+==================
+output directive
+==================
+{{ user }}
+---
+(template
+  (output
+    (variable)))
+
+==================
+empty output
+==================
+{{}} {{ }} {{
+
+}}
+---
+(template
+  (output)
+  (output)
+  (output))

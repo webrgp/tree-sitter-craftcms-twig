@@ -1,0 +1,199 @@
+==================
+divisible by
+==================
+{% if loop.index is divisible by(3) %}
+  ...
+{% endif %}
+---
+(template
+  (if
+    (binary_expression
+      (member_expression
+        (variable)
+        (property))
+      (parenthesized_expression
+        (number)))
+    (source_elements
+      (content))))
+
+==================
+same as parenthesized
+==================
+{% if foo.attribute is same as(false) %}
+  ...
+{% endif %}
+---
+(template
+  (if
+    (binary_expression
+      (member_expression
+        (variable)
+        (property))
+      (parenthesized_expression
+        (boolean)))
+    (source_elements
+      (content))))
+
+==================
+same as
+==================
+{% if foo is same as false %}
+  ...
+{% endif %}
+---
+(template
+  (if
+    (binary_expression
+      (variable)
+      (boolean))
+    (source_elements
+      (content))))
+
+==================
+issue #18
+==================
+{% if app.request.query.get('email') is same as email.uuid %}open{% endif %}
+---
+(template
+  (if
+    (binary_expression
+      (call_expression
+        (member_expression
+          (member_expression
+            (member_expression
+              (variable)
+              (property))
+            (property))
+          (property))
+        (arguments
+          (string)))
+      (member_expression
+        (variable)
+        (property)))
+    (source_elements
+      (content))))
+
+==================
+Craft CMS: type tests - simple types
+==================
+{% if variable is array %}
+  array
+{% elseif variable is boolean %}
+  boolean  
+{% elseif variable is numeric %}
+  numeric
+{% endif %}
+---
+(template
+  (if
+    (binary_expression
+      (variable)
+      (variable))
+    (source_elements
+      (content))
+    (elseif
+      (binary_expression
+        (variable)
+        (variable))
+      (source_elements
+        (content)))
+    (elseif
+      (binary_expression
+        (variable)
+        (variable))
+      (source_elements
+        (content)))))
+
+==================
+Craft CMS: object and capability tests
+==================
+{% if obj is object and func is callable %}
+  object-callable
+{% elseif collection is countable %}
+  countable
+{% endif %}
+---
+(template
+  (if
+    (binary_expression
+      (binary_expression
+        (variable)
+        (variable))
+      (binary_expression
+        (variable)
+        (variable)))
+    (source_elements
+      (content))
+    (elseif
+      (binary_expression
+        (variable)
+        (variable))
+      (source_elements
+        (content)))))
+
+==================
+Craft CMS: number type tests
+==================
+{% if decimal is float %}
+  float
+{% elseif number is integer %}
+  integer
+{% endif %}
+---
+(template
+  (if
+    (binary_expression
+      (variable)
+      (variable))
+    (source_elements
+      (content))
+    (elseif
+      (binary_expression
+        (variable)
+        (variable))
+      (source_elements
+        (content)))))
+
+==================
+Craft CMS: missing component test
+==================
+{% if field is missing %}
+  missing
+{% endif %}
+---
+(template
+  (if
+    (binary_expression
+      (variable)
+      (variable))
+    (source_elements
+      (content))))
+
+==================
+Craft CMS: instance of tests
+==================
+{% if entry is instance of('craft\\elements\\Entry') %}
+  entry
+{% elseif user is instance of('craft\\elements\\User') %}
+  user
+{% endif %}
+---
+(template
+  (if
+    (binary_expression
+      (variable)
+      (call_expression
+        (function)
+        (arguments
+          (string))))
+    (source_elements
+      (content))
+    (elseif
+      (binary_expression
+        (variable)
+        (call_expression
+          (function)
+          (arguments
+            (string))))
+      (source_elements
+        (content)))))

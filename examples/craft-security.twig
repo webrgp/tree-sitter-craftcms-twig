@@ -1,0 +1,64 @@
+{# Craft CMS Security and Access Control Examples #}
+
+{# Basic user login requirement #}
+{% requireLogin %}
+
+<div class="logged-in-content">
+  <h1>Welcome, {{ currentUser.friendlyName }}!</h1>
+  
+  {# Admin-only section #}
+  {% requireAdmin %}
+  <div class="admin-panel">
+    <h2>Admin Controls</h2>
+    <p>Only admins can see this content.</p>
+  </div>
+  
+  {# Specific permission requirement #}
+  {% requirePermission 'editEntries' %}
+  <div class="editor-tools">
+    <a href="{{ entry.cpEditUrl }}" class="edit-button">Edit Entry</a>
+  </div>
+  
+  {# Multiple permission requirements #}
+  {% requirePermission 'publishEntries' %}
+  {% requirePermission 'deleteEntries' %}
+  <div class="publisher-tools">
+    <button class="publish-btn">Publish</button>
+    <button class="delete-btn">Delete</button>
+  </div>
+  
+  {# Conditional admin check #}
+  {% if currentUser.admin %}
+    <div class="admin-info">
+      <p>You have admin privileges</p>
+    </div>
+  {% endif %}
+  
+  {# Permission-based conditional #}
+  {% if currentUser.can('editEntries') %}
+    <a href="{{ entry.cpEditUrl }}">Edit</a>
+  {% endif %}
+  
+  {# Group membership check #}
+  {% if currentUser.isInGroup('editors') %}
+    <div class="editor-interface">
+      <p>Editor tools available</p>
+    </div>
+  {% endif %}
+  
+  {# User profile access #}
+  <div class="user-profile">
+    <img src="{{ currentUser.photo.url }}" alt="{{ currentUser.friendlyName }}">
+    <p>Email: {{ currentUser.email }}</p>
+    <p>Username: {{ currentUser.username }}</p>
+    <p>Admin: {{ currentUser.admin ? 'Yes' : 'No' }}</p>
+  </div>
+  
+</div>
+
+{# Guest users (no login required) #}
+{% if not currentUser %}
+  <div class="guest-content">
+    <p>Please <a href="{{ loginUrl }}">log in</a> to access more features.</p>
+  </div>
+{% endif %}

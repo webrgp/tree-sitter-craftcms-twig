@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ title }}</title>
+</head>
+<body>
+    <h1>Welcome {{ user.name }}!</h1>
+    
+    {# This is a comment #}
+    
+    {% if user.isLoggedIn %}
+        <p>Hello, {{ user.name|upper }}!</p>
+        
+        {% for item in items %}
+            <li>{{ item.name }} - {{ item.price|number_format(2) }}</li>
+        {% endfor %}
+    {% else %}
+        <p>Please log in.</p>
+    {% endif %}
+    
+    {% set total = items|length %}
+    <p>Total items: {{ total }}</p>
+    
+    {% include 'footer.twig' %}
+</body>
+</html>

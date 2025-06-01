@@ -1,0 +1,41 @@
+{# Test Remaining Missing Craft CMS Tags #}
+
+{# Simple tags that should work with generic implementation #}
+{% redirect '/new-url' %}
+{% requireEdition 'pro' %}
+{% requireGuest %}
+
+{# Tags with specific syntax implementations #}
+{% script %}
+  console.log('Hello world');
+{% endscript %}
+
+{% script at head %}
+  console.log('In head');
+{% endscript %}
+
+{% script at head with {async: true, defer: true} %}
+  console.log('With attributes');
+{% endscript %}
+
+{% switch entry.type %}
+  Content here
+{% endswitch %}
+
+{% tag 'div' %}
+{% tag 'input' with {type: 'text', name: 'username'} %}
+
+{# More complex examples #}
+{% switch user.role %}
+  {% case 'admin' %}
+    Admin content
+  {% case 'editor' %}
+    Editor content  
+  {% default %}
+    Default content
+{% endswitch %}
+
+{% tag 'button' with {
+  'class': 'btn btn-primary',
+  'data-action': 'submit'
+} %}

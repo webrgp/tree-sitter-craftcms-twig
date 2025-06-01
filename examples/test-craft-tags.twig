@@ -1,0 +1,34 @@
+{# Test Craft CMS Tags #}
+
+{# Simple tags without arguments #}
+{% requireAdmin %}
+{% requireLogin %}
+
+{# Simple tags with single arguments #}
+{% requirePermission 'editEntries' %}
+{% css '/assets/css/style.css' %}
+{% js '/assets/js/script.js' %}
+
+{# Tags with complex arguments #}
+{% header 'X-Custom': 'value' %}
+{% js '/assets/js/script.js' with {defer: true} %}
+
+{# Block tags that might work with generic implementation #}
+{% namespace 'foo' %}
+  <input name="test" />
+{% endnamespace %}
+
+{# More complex Craft CMS specific syntax #}
+{% cache for 3600 %}
+  Cached content here
+{% endcache %}
+
+{% nav entry in entries %}
+  <li><a href="{{ entry.url }}">{{ entry.title }}</a></li>
+{% endnav %}
+
+{% paginate craft.entries() as pageInfo, entries %}
+  {% for entry in entries %}
+    <h2>{{ entry.title }}</h2>
+  {% endfor %}
+{% endpaginate %}

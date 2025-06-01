@@ -1,0 +1,141 @@
+{# Craft CMS Template Example #}
+{% extends "_layout" %}
+
+{% block content %}
+    {# Require user to be logged in #}
+    {% requireLogin %}
+    
+    {# Cache this section globally for 30 minutes #}
+    {% cache using key "homepage-content" globally for 1800 %}
+        <section class="hero">
+            <h1>{{ entry.title }}</h1>
+            <p>{{ entry.summary|markdown }}</p>
+        </section>
+    {% endcache %}
+    
+    {# Navigation using nav tag #}
+    {% nav craft.entries.section('pages') as nav %}
+        <nav class="main-nav">
+            <ul>
+                {% for item in nav %}
+                    <li class="{{ item.hasDescendants ? 'has-children' : '' }}">
+                        <a href="{{ item.url }}"{{ item.active ? ' class="active"' : '' }}>
+                            {{ item.title }}
+                        </a>
+                        
+                        {% if item.hasDescendants %}
+                            <ul class="submenu">
+                                {% for child in item.children %}
+                                    <li>
+                                        <a href="{{ child.url }}">{{ child.title }}</a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        </nav>
+    {% endnav %}
+    
+    {# Arrow functions with collections #}
+    {% set publishedEntries = craft.entries.all() | filter(entry => entry.status == 'live') %}
+    {% set entryTitles = publishedEntries | map((index, entry) => entry.title | upper) %}
+    
+    <div class="content-grid">
+        {% for entry in publishedEntries %}
+            <article class="entry-card">
+                <h3>
+                    <a href="{{ entry.url }}">{{ entry.title }}</a>
+                </h3>
+                
+                {% if entry.featuredImage %}
+                    {{ tag('img', {
+                        src: entry.featuredImage.url,
+                        alt: entry.featuredImage.alt ?: entry.title,
+                        class: 'featured-image'
+                    }) }}
+                {% endif %}
+                
+                <div class="entry-meta">
+                    <time datetime="{{ entry.postDate|date('c') }}">
+                        {{ entry.postDate|date('F j, Y') }}
+                    </time>
+                    
+                    {% if entry.author %}
+                        <span class="author">
+                            by {{ entry.author.fullName }}
+                        </span>
+                    {% endif %}
+                </div>
+                
+                {% if entry.summary %}
+                    <div class="entry-summary">
+                        {{ entry.summary|striptags|truncate(150) }}
+                    </div>
+                {% endif %}
+                
+                {# Craft-specific filters #}
+                {% set entryData = {
+                    title: entry.title,
+                    url: entry.url,
+                    date: entry.postDate|date('Y-m-d')
+                } | json_encode %}
+                
+                <div class="entry-actions" data-entry="{{ entryData|literal }}">
+                    <a href="{{ entry.url }}" class="read-more">Read More</a>
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+    
+    {# Set HTTP headers #}
+    {% header "Cache-Control": "public, max-age=3600" %}
+    {% header "X-Custom-Header": craft.app.config.custom.customValue %}
+    
+    {# Complex cache with dynamic key #}
+    {% cache using key "entries-" ~ currentUser.id ~ "-" ~ craft.app.request.segment(1) for 600 %}
+        {% set userEntries = craft.entries
+            .authorId(currentUser.id)
+            .limit(10)
+            .all() %}
+            
+        {% if userEntries %}
+            <section class="user-content">
+                <h2>Your Recent Content</h2>
+                <ul>
+                    {% for entry in userEntries %}
+                        <li>
+                            <a href="{{ entry.cpEditUrl }}">{{ entry.title }}</a>
+                            <small>({{ entry.status|title }})</small>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </section>
+        {% endif %}
+    {% endcache %}
+    
+{% endblock %}
+
+{# Include Craft's action input for forms #}
+{% block scripts %}
+    <script>
+        // Arrow function example in JavaScript context
+        const processEntries = entries => entries
+            .filter(entry => entry.published)
+            .map(entry => ({
+                title: entry.title,
+                url: entry.url
+            }));
+            
+        // Craft CMS specific JavaScript
+        const craftData = {
+            siteUrl: "{{ siteUrl }}",
+            csrfToken: "{{ craft.app.request.csrfToken }}",
+            currentUser: {{ currentUser ? {
+                id: currentUser.id,
+                email: currentUser.email
+            } : 'null' }}
+        };
+    </script>
+{% endblock %}

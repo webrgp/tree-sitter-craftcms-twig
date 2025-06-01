@@ -1,0 +1,25 @@
+{# Test Missing Craft CMS Tags #}
+
+{# Simple tags that should work with generic implementation #}
+{% dd variable %}
+{% dump %}
+{% dump variable %}
+{% exit %}
+{% exit 404 %}
+{% hook 'template-hook' %}
+
+{# Tags with specific syntax implementations #}
+{% expires in 1 hour %}
+{% expires on "2024-12-31" %}
+
+{% html %}
+  <script>console.log('test');</script>
+{% endhtml %}
+
+{% html at head %}
+  <meta name="description" content="test">
+{% endhtml %}
+
+{# More complex examples #}
+{% expires in craft.app.request.segment(1) ~ ' hours' %}
+{% hook 'before-content' with { entry: entry } %}

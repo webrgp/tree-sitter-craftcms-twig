@@ -1,0 +1,13 @@
+{# Register a CSS file #}
+{% css "/assets/css/style.css" %}
+
+{# Register a CSS code block #}
+{% css %}
+  .content {
+    color: {{ entry.textColor }};
+  }
+
+  #some-id {
+    background-color: blue;
+  }
+{% endcss %}

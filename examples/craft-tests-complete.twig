@@ -1,0 +1,66 @@
+{# Complete Craft CMS Tests Implementation #}
+
+<div class="comprehensive-tests">
+  
+  {# All 10 Craft CMS tests working! #}
+  
+  {% if myArray is array %}
+    <p>✅ Array test works</p>
+  {% endif %}
+  
+  {% if myFlag is boolean %}
+    <p>✅ Boolean test works</p>
+  {% endif %}
+  
+  {% if myFunction is callable %}
+    <p>✅ Callable test works</p>
+  {% endif %}
+  
+  {% if myCollection is countable %}
+    <p>✅ Countable test works</p>
+  {% endif %}
+  
+  {% if myDecimal is float %}
+    <p>✅ Float test works</p>
+  {% endif %}
+  
+  {% if entry is instance of('craft\\elements\\Entry') %}
+    <p>✅ Instance of test works</p>
+  {% endif %}
+  
+  {% if myNumber is integer %}
+    <p>✅ Integer test works</p>
+  {% endif %}
+  
+  {% if missingField is missing %}
+    <p>✅ Missing test works</p>
+  {% endif %}
+  
+  {% if myValue is numeric %}
+    <p>✅ Numeric test works</p>
+  {% endif %}
+  
+  {% if myObj is object %}
+    <p>✅ Object test works</p>
+  {% endif %}
+  
+  {# Complex combinations #}
+  {% if entry is instance of('craft\\elements\\Entry') and entry.id is numeric %}
+    <div class="entry-info">
+      <h3>{{ entry.title }}</h3>
+      <p>Entry ID: {{ entry.id }}</p>
+    </div>
+  {% endif %}
+  
+  {# Mixed with standard Twig tests #}
+  {% if entry.customField is defined and entry.customField is not empty %}
+    {% if entry.customField is array and entry.customField is countable %}
+      <ul>
+        {% for item in entry.customField %}
+          <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endif %}
+  
+</div>

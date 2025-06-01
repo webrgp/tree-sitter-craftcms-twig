@@ -1,0 +1,17 @@
+{# Register a JS file: #}
+{% js "/assets/js/script.js" %}
+
+{# Register a JS code block: #}
+{% js %}
+  _gaq.push([
+    "_trackEvent",
+    "Search",
+    "{{ searchTerm|e('js') }}"
+  ]);
+{% endjs %}
+
+{% script with {type: 'module'} %}
+  import { myFunction } from '/assets/js/myModule.js';
+  import { myFunction } from '{{ moduleString }}';
+  myFunction();
+{% endscript %}

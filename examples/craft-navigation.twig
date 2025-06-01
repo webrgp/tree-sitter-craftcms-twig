@@ -1,0 +1,158 @@
+{# Craft CMS Navigation and Pagination Examples #}
+
+{# Basic navigation structure #}
+{% nav entry in craft.entries().section('pages').all() %}
+  <li>
+    <a href="{{ entry.url }}"{{ entry.active ? ' class="active"' : '' }}>
+      {{ entry.title }}
+    </a>
+    
+    {% ifchildren %}
+      <ul class="submenu">
+        {% children %}
+      </ul>
+    {% endifchildren %}
+  </li>
+{% endnav %}
+
+{# Multi-level navigation with structure #}
+{% nav page in structure %}
+  <li class="nav-item level-{{ level }}">
+    <a href="{{ page.url }}" 
+       class="nav-link{{ page.hasDescendants ? ' has-children' : '' }}{{ page.active ? ' active' : '' }}">
+      {{ page.title }}
+    </a>
+    
+    {% ifchildren %}
+      <ul class="nav-submenu">
+        {% children %}
+      </ul>
+    {% endifchildren %}
+  </li>
+{% endnav %}
+
+{# Navigation with custom depth #}
+{% nav entry in craft.entries().section('docs').level(1).all() %}
+  <li>
+    <a href="{{ entry.url }}">{{ entry.title }}</a>
+    
+    {% ifchildren %}
+      <ul>
+        {% nav child in entry.children.all() %}
+          <li>
+            <a href="{{ child.url }}">{{ child.title }}</a>
+            
+            {% ifchildren %}
+              <ul>
+                {% children %}
+              </ul>
+            {% endifchildren %}
+          </li>
+        {% endnav %}
+      </ul>
+    {% endifchildren %}
+  </li>
+{% endnav %}
+
+{# Pagination examples #}
+<section class="blog">
+  {% paginate craft.entries().section('blog').limit(5) as pageInfo, pageEntries %}
+  
+  <div class="entries">
+    {% for entry in pageEntries %}
+      <article class="blog-entry">
+        <h2><a href="{{ entry.url }}">{{ entry.title }}</a></h2>
+        <p class="meta">{{ entry.postDate|date('M j, Y') }}</p>
+        <div class="excerpt">{{ entry.summary }}</div>
+      </article>
+    {% endfor %}
+  </div>
+  
+  {# Pagination controls #}
+  {% if pageInfo.totalPages > 1 %}
+    <nav class="pagination">
+      {% if pageInfo.prevUrl %}
+        <a href="{{ pageInfo.prevUrl }}" class="prev">Previous</a>
+      {% endif %}
+      
+      {% for page, url in pageInfo.rangeUrls(5) %}
+        {% if url %}
+          <a href="{{ url }}"{{ page == pageInfo.currentPage ? ' class="current"' : '' }}>{{ page }}</a>
+        {% else %}
+          <span class="current">{{ page }}</span>
+        {% endif %}
+      {% endfor %}
+      
+      {% if pageInfo.nextUrl %}
+        <a href="{{ pageInfo.nextUrl }}" class="next">Next</a>
+      {% endif %}
+    </nav>
+    
+    <div class="pagination-info">
+      <p>
+        Showing {{ pageInfo.first }} to {{ pageInfo.last }} 
+        of {{ pageInfo.total }} entries
+        (Page {{ pageInfo.currentPage }} of {{ pageInfo.totalPages }})
+      </p>
+    </div>
+  {% endif %}
+  
+{% endpaginate %}
+
+{# Advanced pagination with custom page size #}
+{% set pageSize = craft.app.request.getParam('limit', 10) %}
+{% paginate craft.entries().section('products').limit(pageSize) as pageInfo, products %}
+  
+  <div class="products-grid">
+    {% for product in products %}
+      <div class="product-card">
+        <h3>{{ product.title }}</h3>
+        <p>${{ product.price }}</p>
+      </div>
+    {% endfor %}
+  </div>
+  
+  {# Custom pagination with page size selector #}
+  <div class="pagination-controls">
+    <form method="get">
+      <label for="limit">Items per page:</label>
+      <select name="limit" id="limit" onchange="this.form.submit()">
+        <option value="5"{{ pageSize == 5 ? ' selected' : '' }}>5</option>
+        <option value="10"{{ pageSize == 10 ? ' selected' : '' }}>10</option>
+        <option value="25"{{ pageSize == 25 ? ' selected' : '' }}>25</option>
+      </select>
+    </form>
+  </div>
+  
+{% endpaginate %}
+
+{# Namespaced forms and inputs #}
+{% namespace 'contact-form' %}
+  <form method="post">
+    {{ actionInput('contact/send') }}
+    {{ csrfInput() }}
+    
+    <div class="field">
+      <label for="name">Name</label>
+      <input type="text" id="name" name="name" required>
+    </div>
+    
+    <div class="field">
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" required>
+    </div>
+    
+    <button type="submit">Send Message</button>
+  </form>
+{% endnamespace %}
+
+{# Namespaced with CSS classes #}
+{% namespace 'modal' withClasses %}
+  <div class="overlay">
+    <div class="content">
+      <h2 id="title">Modal Title</h2>
+      <p>Modal content goes here.</p>
+      <button class="close-btn">Close</button>
+    </div>
+  </div>
+{% endnamespace %}

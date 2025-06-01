@@ -1,0 +1,256 @@
+{# Craft CMS Advanced Features and Edge Cases #}
+
+{# Complex nested cache scenarios #}
+{% cache using key "complex-" ~ currentSite.handle ~ "-" ~ currentUser.id for 1 hour if not devMode %}
+  
+  {# Nested navigation with conditional caching #}
+  {% cache globally for 30 minutes unless craft.app.request.isConsoleRequest %}
+    {% nav menuItem in craft.entries().section('mainMenu').level(1).all() %}
+      <li class="menu-item-{{ menuItem.id }}">
+        <a href="{{ menuItem.url }}" {{ menuItem.active ? 'aria-current="page"' : '' }}>
+          {{ menuItem.title }}
+        </a>
+        
+        {% ifchildren %}
+          {% cache for 15 minutes %}
+            <ul class="submenu">
+              {% children %}
+            </ul>
+          {% endcache %}
+        {% endifchildren %}
+      </li>
+    {% endnav %}
+  {% endcache %}
+  
+  {# Complex pagination with multiple filters #}
+  {% set query = craft.entries()
+    .section('products')
+    .relatedTo(currentCategory)
+    .orderBy('title asc') %}
+    
+  {% paginate query.limit(12) as pageInfo, products %}
+    
+    {# Namespace form controls #}
+    {% namespace 'product-filters' withClasses %}
+      <form method="get" class="filters">
+        {{ csrfInput() }}
+        
+        <div class="filter-group">
+          <label for="category">Category</label>
+          <select name="category" id="category">
+            {% for cat in craft.categories().group('productCategories').all() %}
+              <option value="{{ cat.id }}">{{ cat.title }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        
+        <button type="submit" class="apply-filters">Apply Filters</button>
+      </form>
+    {% endnamespace %}
+    
+    <div class="products-grid">
+      {% for product in products %}
+        <article class="product" data-id="{{ product.id }}">
+          
+          {# Conditional admin features #}
+          {% requirePermission 'editEntries' %}
+            <div class="admin-controls">
+              <a href="{{ product.cpEditUrl }}" class="edit-link">
+                {{ svg('@webroot/icons/edit.svg') }}
+              </a>
+            </div>
+          {% endrequirePermission %}
+          
+          <header>
+            <h3>{{ product.title }}</h3>
+            
+            {# Complex price display with currency formatting #}
+            {% if product.price is numeric and product.price > 0 %}
+              <div class="price">
+                {{ product.price|currency(currentSite.currency) }}
+                
+                {% if product.salePrice %}
+                  <span class="sale">
+                    Was: {{ product.originalPrice|currency(currentSite.currency) }}
+                  </span>
+                {% endif %}
+              </div>
+            {% endif %}
+          </header>
+          
+          {# Image handling with data URLs for lazy loading #}
+          {% if product.images.one() %}
+            {% set image = product.images.one() %}
+            <figure class="product-image">
+              <img src="{{ dataUrl(image.getImg()) }}" 
+                   data-src="{{ image.url }}"
+                   alt="{{ image.alt ?: product.title }}"
+                   loading="lazy">
+            </figure>
+          {% endif %}
+          
+          <div class="content">
+            {{ product.description|truncate(150)|parseRefs }}
+          </div>
+          
+          {# Advanced array operations #}
+          {% set tags = product.tags.all()|column('title') %}
+          {% set featuredTags = tags|firstWhere('featured', true) %}
+          
+          {% if tags|contains('new') %}
+            <span class="badge new">New</span>
+          {% endif %}
+          
+          <div class="tags">
+            {% for tag in tags %}
+              <span class="tag">{{ tag|camel }}</span>
+            {% endfor %}
+          </div>
+          
+        </article>
+      {% endfor %}
+    </div>
+    
+    {# Advanced pagination with custom styling #}
+    {% if pageInfo.totalPages > 1 %}
+      <nav class="pagination" role="navigation" aria-label="Pagination">
+        
+        {% if pageInfo.prevUrl %}
+          <a href="{{ pageInfo.prevUrl }}" class="pagination-prev" rel="prev">
+            {{ svg('@webroot/icons/arrow-left.svg') }}
+            Previous
+          </a>
+        {% endif %}
+        
+        <div class="pagination-numbers">
+          {% for page, url in pageInfo.getRangeUrls(5) %}
+            {% if url %}
+              <a href="{{ url }}" 
+                 class="pagination-number{{ page == pageInfo.currentPage ? ' current' : '' }}"
+                 {{ page == pageInfo.currentPage ? 'aria-current="page"' : '' }}>
+                {{ page }}
+              </a>
+            {% else %}
+              <span class="pagination-ellipsis">…</span>
+            {% endif %}
+          {% endfor %}
+        </div>
+        
+        {% if pageInfo.nextUrl %}
+          <a href="{{ pageInfo.nextUrl }}" class="pagination-next" rel="next">
+            Next
+            {{ svg('@webroot/icons/arrow-right.svg') }}
+          </a>
+        {% endif %}
+        
+      </nav>
+    {% endif %}
+    
+  {% endpaginate %}
+  
+{% endcache %}
+
+{# Advanced JavaScript and CSS management #}
+{% css %}
+  :root {
+    --primary-color: {{ entry.brandColor ?: '#007acc' }};
+    --font-family: {{ entry.fontFamily ?: 'system-ui' }};
+  }
+  
+  .dynamic-theme {
+    background: var(--primary-color);
+    font-family: var(--font-family);
+  }
+{% endcss %}
+
+{% js at head %}
+  window.craftConfig = {
+    siteUrl: {{ siteUrl()|json_encode|raw }},
+    currentUser: {{ currentUser ? {
+      id: currentUser.id,
+      username: currentUser.username,
+      admin: currentUser.admin
+    }|json_encode : 'null' }},
+    csrfToken: {{ craft.app.request.csrfToken|json_encode|raw }},
+    language: {{ currentSite.language|json_encode|raw }}
+  };
+{% endjs %}
+
+{# Complex security scenarios #}
+{% requireLogin %}
+  
+  {# Multi-level permission checking #}
+  {% if currentUser.can('editEntries:' ~ entry.section.uid) %}
+    {% requirePermission 'publishEntries:' ~ entry.section.uid %}
+      <div class="publisher-interface">
+        <h2>Publishing Controls</h2>
+        
+        {% if entry.status == 'draft' %}
+          <form method="post">
+            {{ actionInput('entries/save-entry') }}
+            {{ csrfInput() }}
+            {{ hiddenInput('entryId', entry.id) }}
+            {{ hiddenInput('enabled', '1') }}
+            
+            <button type="submit" class="publish-btn">Publish Entry</button>
+          </form>
+        {% endif %}
+        
+      </div>
+    {% endrequirePermission %}
+  {% endif %}
+  
+  {# Admin-only debugging information #}
+  {% requireAdmin %}
+    <div class="debug-info">
+      <h3>Debug Information</h3>
+      <details>
+        <summary>Entry Data</summary>
+        {{ dump(entry) }}
+      </details>
+    </div>
+  {% endrequireAdmin %}
+
+{# GraphQL integration with error handling #}
+{% set query = '{
+  entries(section: "testimonials", limit: 5) {
+    id
+    title
+    ... on testimonials_Entry {
+      authorName
+      rating
+      content
+    }
+  }
+}' %}
+
+{% set result = gql(query) %}
+
+{% if result.errors is empty %}
+  <section class="testimonials">
+    <h2>Customer Testimonials</h2>
+    
+    {% for testimonial in result.data.entries %}
+      <blockquote class="testimonial" data-rating="{{ testimonial.rating }}">
+        <div class="content">{{ testimonial.content|nl2br }}</div>
+        <cite class="author">— {{ testimonial.authorName }}</cite>
+        
+        <div class="rating">
+          {% for i in 1..5 %}
+            <span class="star{{ i <= testimonial.rating ? ' filled' : '' }}">★</span>
+          {% endfor %}
+        </div>
+      </blockquote>
+    {% endfor %}
+  </section>
+{% else %}
+  <div class="error">
+    <p>Unable to load testimonials at this time.</p>
+  </div>
+{% endif %}
+
+{# Custom HTTP headers with dynamic values #}
+{% header 'X-Entry-Type': entry.section.handle %}
+{% header 'X-Author': entry.author.username %}
+{% header 'X-Last-Modified': entry.dateUpdated|date('c') %}
+{% header 'Cache-Control': entry.cacheDirective ?: 'public, max-age=3600' %}

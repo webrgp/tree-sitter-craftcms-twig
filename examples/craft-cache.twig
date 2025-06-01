@@ -1,0 +1,58 @@
+{# Craft CMS Cache Tag Examples #}
+
+{# Basic cache with duration #}
+{% cache for 1 hour %}
+  <div class="expensive-computation">
+    {% for entry in craft.entries().section('news').limit(10).all() %}
+      <article>{{ entry.title }}</article>
+    {% endfor %}
+  </div>
+{% endcache %}
+
+{# Cache with custom key #}
+{% cache using key "homepage-content-" ~ currentSite.handle %}
+  {{ entry.body }}
+{% endcache %}
+
+{# Cache globally across all sites #}
+{% cache globally for 30 minutes %}
+  {% set stats = craft.entries().count() %}
+  <p>Total entries: {{ stats }}</p>
+{% endcache %}
+
+{# Cache with conditional #}
+{% cache for 1 day if not currentUser %}
+  <div class="public-content">
+    {{ entry.publicContent }}
+  </div>
+{% endcache %}
+
+{# Cache with unless condition #}
+{% cache for 1 hour unless devMode %}
+  <div class="production-only">
+    {{ heavyComputation() }}
+  </div>
+{% endcache %}
+
+{# Complex cache with multiple modifiers #}
+{% cache using key "user-content-" ~ currentUser.id globally for 2 hours if currentUser %}
+  <div class="user-dashboard">
+    {% for entry in craft.entries().authorId(currentUser.id).all() %}
+      <div class="user-entry">{{ entry.title }}</div>
+    {% endfor %}
+  </div>
+{% endcache %}
+
+{# Cache with dynamic duration #}
+{% cache for entry.cacheTime ~ ' minutes' %}
+  {{ entry.dynamicContent }}
+{% endcache %}
+
+{# Nested caches #}
+{% cache for 1 day %}
+  <section class="outer">
+    {% cache for 1 hour %}
+      <div class="inner">{{ entry.title }}</div>
+    {% endcache %}
+  </section>
+{% endcache %}

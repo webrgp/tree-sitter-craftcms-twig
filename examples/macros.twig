@@ -1,0 +1,228 @@
+{# Utility macros for common UI components #}
+
+{% macro button(text, url, type, size, icon) %}
+    {% set classes = ['btn'] %}
+    {% set classes = classes|merge(['btn-' ~ (type|default('primary'))]) %}
+    {% set classes = classes|merge(['btn-' ~ (size|default('md'))]) %}
+    
+    <a href="{{ url }}" class="{{ classes|join(' ') }}"{% if icon %} data-icon="{{ icon }}"{% endif %}>
+        {% if icon %}
+            <i class="icon icon-{{ icon }}"></i>
+        {% endif %}
+        {{ text }}
+    </a>
+{% endmacro %}
+
+{% macro card(title, content, footer, image) %}
+    <div class="card">
+        {% if image %}
+            <div class="card-image">
+                <img src="{{ image.src }}" alt="{{ image.alt|default(title) }}">
+            </div>
+        {% endif %}
+        
+        <div class="card-body">
+            {% if title %}
+                <h3 class="card-title">{{ title }}</h3>
+            {% endif %}
+            
+            <div class="card-content">
+                {{ content|raw }}
+            </div>
+        </div>
+        
+        {% if footer %}
+            <div class="card-footer">
+                {{ footer|raw }}
+            </div>
+        {% endif %}
+    </div>
+{% endmacro %}
+
+{% macro form_field(field, label, type, options) %}
+    {% set field_id = 'field_' ~ field %}
+    {% set field_name = options.name|default(field) %}
+    {% set field_value = options.value|default('') %}
+    {% set field_class = ['form-control'] %}
+    
+    {% if options.error %}
+        {% set field_class = field_class|merge(['is-invalid']) %}
+    {% endif %}
+    
+    {% if options.required %}
+        {% set field_class = field_class|merge(['required']) %}
+    {% endif %}
+
+    <div class="form-group{% if options.error %} has-error{% endif %}">
+        {% if label %}
+            <label for="{{ field_id }}" class="form-label">
+                {{ label }}
+                {% if options.required %}<span class="required">*</span>{% endif %}
+            </label>
+        {% endif %}
+        
+        {% if type == 'textarea' %}
+            <textarea 
+                id="{{ field_id }}" 
+                name="{{ field_name }}" 
+                class="{{ field_class|join(' ') }}"
+                {% if options.placeholder %}placeholder="{{ options.placeholder }}"{% endif %}
+                {% if options.rows %}rows="{{ options.rows }}"{% endif %}
+                {% if options.required %}required{% endif %}
+            >{{ field_value }}</textarea>
+        {% elseif type == 'select' %}
+            <select 
+                id="{{ field_id }}" 
+                name="{{ field_name }}" 
+                class="{{ field_class|join(' ') }}"
+                {% if options.required %}required{% endif %}
+            >
+                {% if options.placeholder %}
+                    <option value="">{{ options.placeholder }}</option>
+                {% endif %}
+                
+                {% for option_value, option_label in options.choices %}
+                    <option value="{{ option_value }}"{% if option_value == field_value %} selected{% endif %}>
+                        {{ option_label }}
+                    </option>
+                {% endfor %}
+            </select>
+        {% elseif type == 'checkbox' %}
+            <div class="form-check">
+                <input 
+                    type="checkbox" 
+                    id="{{ field_id }}" 
+                    name="{{ field_name }}" 
+                    value="{{ options.checkbox_value|default('1') }}"
+                    class="form-check-input"
+                    {% if field_value %}checked{% endif %}
+                    {% if options.required %}required{% endif %}
+                >
+                {% if label %}
+                    <label for="{{ field_id }}" class="form-check-label">
+                        {{ label }}
+                    </label>
+                {% endif %}
+            </div>
+        {% else %}
+            <input 
+                type="{{ type|default('text') }}" 
+                id="{{ field_id }}" 
+                name="{{ field_name }}" 
+                value="{{ field_value }}" 
+                class="{{ field_class|join(' ') }}"
+                {% if options.placeholder %}placeholder="{{ options.placeholder }}"{% endif %}
+                {% if options.min %}min="{{ options.min }}"{% endif %}
+                {% if options.max %}max="{{ options.max }}"{% endif %}
+                {% if options.pattern %}pattern="{{ options.pattern }}"{% endif %}
+                {% if options.required %}required{% endif %}
+            >
+        {% endif %}
+        
+        {% if options.help %}
+            <small class="form-help">{{ options.help }}</small>
+        {% endif %}
+        
+        {% if options.error %}
+            <div class="form-error">{{ options.error }}</div>
+        {% endif %}
+    </div>
+{% endmacro %}
+
+{% macro pagination(current_page, total_pages, base_url, show_numbers) %}
+    {% if total_pages > 1 %}
+        <nav class="pagination" aria-label="Pagination">
+            <ul class="pagination-list">
+                {# Previous button #}
+                {% if current_page > 1 %}
+                    <li class="pagination-item">
+                        <a href="{{ base_url }}?page={{ current_page - 1 }}" class="pagination-link pagination-prev" aria-label="Previous page">
+                            &#8249; Previous
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="pagination-item">
+                        <span class="pagination-link pagination-prev disabled" aria-label="Previous page">
+                            &#8249; Previous
+                        </span>
+                    </li>
+                {% endif %}
+                
+                {# Page numbers #}
+                {% if show_numbers|default(true) %}
+                    {% set start_page = max(1, current_page - 2) %}
+                    {% set end_page = min(total_pages, current_page + 2) %}
+                    
+                    {% if start_page > 1 %}
+                        <li class="pagination-item">
+                            <a href="{{ base_url }}?page=1" class="pagination-link">1</a>
+                        </li>
+                        {% if start_page > 2 %}
+                            <li class="pagination-item">
+                                <span class="pagination-ellipsis">...</span>
+                            </li>
+                        {% endif %}
+                    {% endif %}
+                    
+                    {% for page in start_page..end_page %}
+                        <li class="pagination-item">
+                            {% if page == current_page %}
+                                <span class="pagination-link pagination-current" aria-current="page">{{ page }}</span>
+                            {% else %}
+                                <a href="{{ base_url }}?page={{ page }}" class="pagination-link">{{ page }}</a>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                    
+                    {% if end_page < total_pages %}
+                        {% if end_page < total_pages - 1 %}
+                            <li class="pagination-item">
+                                <span class="pagination-ellipsis">...</span>
+                            </li>
+                        {% endif %}
+                        <li class="pagination-item">
+                            <a href="{{ base_url }}?page={{ total_pages }}" class="pagination-link">{{ total_pages }}</a>
+                        </li>
+                    {% endif %}
+                {% endif %}
+                
+                {# Next button #}
+                {% if current_page < total_pages %}
+                    <li class="pagination-item">
+                        <a href="{{ base_url }}?page={{ current_page + 1 }}" class="pagination-link pagination-next" aria-label="Next page">
+                            Next &#8250;
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="pagination-item">
+                        <span class="pagination-link pagination-next disabled" aria-label="Next page">
+                            Next &#8250;
+                        </span>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+{% endmacro %}
+
+{% macro breadcrumb(items) %}
+    {% if items and items|length > 0 %}
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+            <ol class="breadcrumb-list">
+                {% for item in items %}
+                    <li class="breadcrumb-item{% if loop.last %} active{% endif %}">
+                        {% if not loop.last and item.url %}
+                            <a href="{{ item.url }}" class="breadcrumb-link">{{ item.title }}</a>
+                        {% else %}
+                            <span class="breadcrumb-text">{{ item.title }}</span>
+                        {% endif %}
+                        
+                        {% if not loop.last %}
+                            <span class="breadcrumb-separator" aria-hidden="true">&#8250;</span>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ol>
+        </nav>
+    {% endif %}
+{% endmacro %}

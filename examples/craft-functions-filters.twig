@@ -1,0 +1,178 @@
+{# Craft CMS Functions and Filters Examples #}
+
+<article class="entry">
+  <header>
+    <h1>{{ entry.title }}</h1>
+    
+    {# URL generation functions #}
+    <nav class="breadcrumbs">
+      <a href="{{ siteUrl() }}">Home</a>
+      <a href="{{ siteUrl('blog') }}">Blog</a>
+      <span>{{ entry.title }}</span>
+    </nav>
+  </header>
+  
+  <main>
+    {# Content with parsing and filtering #}
+    <div class="content">
+      {{ entry.body|parseRefs|raw }}
+    </div>
+    
+    {# Purified user content #}
+    <div class="user-comments">
+      {% for comment in entry.comments %}
+        <div class="comment">
+          <strong>{{ comment.author }}</strong>
+          <div>{{ comment.content|purify }}</div>
+        </div>
+      {% endfor %}
+    </div>
+    
+    {# String formatting and manipulation #}
+    <div class="meta">
+      <p>Published: {{ entry.postDate|timestamp }}</p>
+      <p>Slug: {{ entry.title|ascii|camel }}</p>
+      <p>ID: {{ 'entry-'|append(entry.id) }}</p>
+    </div>
+    
+    {# Currency and number formatting #}
+    {% if entry.price %}
+      <div class="price">
+        <span class="amount">{{ entry.price|currency('USD') }}</span>
+      </div>
+    {% endif %}
+    
+    {# Array and collection manipulation #}
+    {% set relatedEntries = craft.entries().relatedTo(entry).all() %}
+    {% set entryTitles = relatedEntries|column('title') %}
+    {% set firstPublished = relatedEntries|firstWhere('status', 'live') %}
+    
+    {% if relatedEntries|contains('featured', true) %}
+      <div class="featured-notice">
+        <p>This entry has featured related content.</p>
+      </div>
+    {% endif %}
+    
+    <div class="related">
+      <h3>Related Entries</h3>
+      {% for title in entryTitles %}
+        <p>{{ title }}</p>
+      {% endfor %}
+    </div>
+    
+    {# Address formatting #}
+    {% if entry.address %}
+      <div class="location">
+        {{ entry.address|address }}
+      </div>
+    {% endif %}
+    
+  </main>
+  
+  <aside>
+    {# GraphQL data fetching #}
+    {% set newsData = gql('{
+      entries(section: "news", limit: 3) {
+        title
+        url
+        postDate
+      }
+    }') %}
+    
+    <div class="latest-news">
+      <h3>Latest News</h3>
+      {% for item in newsData.data.entries %}
+        <article>
+          <h4><a href="{{ item.url }}">{{ item.title }}</a></h4>
+          <time>{{ item.postDate|date('M j, Y') }}</time>
+        </article>
+      {% endfor %}
+    </div>
+    
+    {# Sequence numbers for tracking #}
+    <div class="stats" data-view-id="{{ seq('page-views:' ~ entry.id) }}">
+      <p>Page view: {{ seq('global-views') }}</p>
+    </div>
+    
+    {# Plugin integration #}
+    {% set commercePlugin = plugin('commerce') %}
+    {% if commercePlugin %}
+      <div class="commerce-info">
+        <p>Commerce version: {{ commercePlugin.version }}</p>
+      </div>
+    {% endif %}
+    
+  </aside>
+  
+  <footer>
+    {# Form with CSRF and action inputs #}
+    <form method="post" class="newsletter">
+      {{ actionInput('newsletter/subscribe') }}
+      {{ csrfInput() }}
+      
+      <div class="field">
+        <label for="{{ 'email'|id }}">Email Address</label>
+        <input type="email" id="{{ 'email'|id }}" name="email" required>
+      </div>
+      
+      <button type="submit">Subscribe</button>
+    </form>
+    
+    {# SVG icons and data URLs #}
+    <div class="social-links">
+      <a href="#" title="Facebook">
+        {{ svg('@webroot/icons/facebook.svg', {class: 'social-icon'}) }}
+      </a>
+      <a href="#" title="Twitter">  
+        {{ svg('@webroot/icons/twitter.svg', {class: 'social-icon'}) }}
+      </a>
+    </div>
+    
+    {# Encrypted data #}
+    <div class="secure-data" data-token="{{ entry.id|hash }}">
+      <p>Secure content: {{ 'sensitive-data'|encenc }}</p>
+    </div>
+    
+    {# Object creation and collection handling #}
+    {% set entryCollection = collect(craft.entries().section('blog').all()) %}
+    {% set recentEntries = entryCollection.filter(e => e.postDate > yesterday) %}
+    
+    <div class="recent-count">
+      <p>Recent entries: {{ recentEntries.count() }}</p>
+    </div>
+    
+    {# Type checking and validation #}
+    {% if entry.customData is array %}
+      <div class="custom-data">
+        {% for item in entry.customData %}
+          {% if item is numeric %}
+            <span class="number">{{ item }}</span>
+          {% elseif item is boolean %}
+            <span class="boolean">{{ item ? 'Yes' : 'No' }}</span>
+          {% else %}
+            <span class="text">{{ item }}</span>
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% endif %}
+    
+    {# Object instance checking #}
+    {% if entry is instance of('craft\\elements\\Entry') %}
+      <p>This is a Craft Entry element</p>
+    {% endif %}
+    
+    {# Missing component check #}
+    {% if someField is missing %}
+      <p>Field is not available</p>
+    {% endif %}
+    
+  </footer>
+</article>
+
+{# Namespace example with HTML attributes #}
+{% namespace 'article-' ~ entry.id %}
+  <div class="namespaced-content">
+    <input type="text" name="title" id="title">
+    <textarea name="content" id="content"></textarea>
+  </div>
+{% endnamespace %}
