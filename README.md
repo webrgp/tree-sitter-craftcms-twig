@@ -14,7 +14,7 @@ npm install tree-sitter-craftcms-twig
 
 ```toml
 [dependencies]
-tree-sitter-craftcms-twig = "0.4.0"
+tree-sitter-craftcms-twig = "0.1.0"
 ```
 
 ## Usage
